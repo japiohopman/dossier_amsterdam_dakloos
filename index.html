@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172b36">
+  <meta name="description" content="Lokale werkplek om een persoonlijk bewijsdossier chronologisch op te bouwen.">
+  <title>Dossier Amsterdam — lokale werkplek</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Dossier Amsterdam startpagina">
+      <span class="brand-mark">DA</span>
+      <span><strong>Dossier Amsterdam</strong><small>Feitelijk verblijf · bewijs en tijdlijn</small></span>
+    </a>
+    <div class="top-actions">
+      <span class="local-pill"><span class="dot"></span> Alleen lokaal opgeslagen</span>
+      <button class="button button-light" id="print-button" type="button">Print / PDF</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="privacy-banner" aria-label="Privacy-informatie">
+      <div class="privacy-icon">✓</div>
+      <div>
+        <strong>Je dossier blijft op dit apparaat</strong>
+        <p>Ingevoerde gegevens en bewijsbestanden worden alleen in deze browser bewaard. Ze worden niet naar GitHub geüpload. Maak regelmatig een versleutelde back-up.</p>
+      </div>
+    </section>
+
+    <section class="page-intro">
+      <p class="eyebrow">PERSOONLIJKE DOSSIERWERKPLEK</p>
+      <h1>Een helder overzicht.<br><span>Elk bewijsstuk op zijn plaats.</span></h1>
+      <p class="intro-copy">Breng woonperiodes, gebeurtenissen, documenten en verklaringen samen in één chronologisch dossier.</p>
+    </section>
+
+    <section class="stats-grid" aria-label="Dossieroverzicht">
+      <article class="stat-card"><span class="stat-label">Tijdlijn</span><strong id="stat-timeline">0</strong><span class="stat-note">gebeurtenissen</span></article>
+      <article class="stat-card"><span class="stat-label">Bewijsstukken</span><strong id="stat-evidence">0</strong><span class="stat-note">geregistreerd</span></article>
+      <article class="stat-card"><span class="stat-label">Verklaringen</span><strong id="stat-witnesses">0</strong><span class="stat-note">contactpersonen</span></article>
+      <article class="stat-card"><span class="stat-label">Contactmomenten</span><strong id="stat-contacts">0</strong><span class="stat-note">gemeente en hulpverlening</span></article>
+    </section>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <p class="sidebar-title">DOSSIER</p>
+        <nav class="nav-list" aria-label="Dossieronderdelen">
+          <button class="nav-button active" data-view="overview" type="button"><span>⌂</span> Overzicht</button>
+          <button class="nav-button" data-view="profile" type="button"><span>◉</span> Persoonlijke verklaring</button>
+          <button class="nav-button" data-view="timeline" type="button"><span>↕</span> Tijdlijn</button>
+          <button class="nav-button" data-view="evidence" type="button"><span>▤</span> Bewijsstukken</button>
+          <button class="nav-button" data-view="witnesses" type="button"><span>◎</span> Getuigenverklaringen</button>
+          <button class="nav-button" data-view="contacts" type="button"><span>✉</span> Contactlog</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <p class="sidebar-title">BACK-UP</p>
+          <button class="button button-outline full" id="export-button" type="button">↓ Versleutelde back-up</button>
+          <label class="button button-outline full file-button" for="import-file">↑ Back-up terugzetten</label>
+          <input id="import-file" type="file" accept=".json,application/json" hidden>
+          <p class="tiny-note">Bewaar je back-up veilig. Alleen met het wachtwoord kun je deze terugzetten.</p>
+        </div>
+      </aside>
+
+      <div class="content">
+        <section class="view active" id="view-overview">
+          <div class="section-heading">
+            <div><p class="eyebrow">STARTPUNT</p><h2>Dossieroverzicht</h2></div>
+            <span class="status-chip" id="save-status">Lokaal opgeslagen</span>
+          </div>
+          <div class="overview-card">
+            <div>
+              <p class="eyebrow">WERKWIJZE</p>
+              <h3>Van losse herinneringen naar controleerbaar bewijs</h3>
+              <p>Leg eerst de woonperiodes en belangrijke gebeurtenissen vast. Koppel daarna bewijsstukken en personen aan de juiste periode. Noteer ook wat je nog hebt opgevraagd.</p>
+            </div>
+            <div class="overview-steps">
+              <div><b>01</b><span>Maak je persoonlijke verklaring</span></div>
+              <div><b>02</b><span>Voeg gebeurtenissen toe aan de tijdlijn</span></div>
+              <div><b>03</b><span>Registreer bewijs en getuigen</span></div>
+              <div><b>04</b><span>Houd contact met instanties bij</span></div>
+            </div>
+          </div>
+          <div class="two-column">
+            <article class="panel">
+              <div class="panel-heading"><h3>Laatste tijdlijnitems</h3><button class="text-button" data-go="timeline" type="button">Alles bekijken →</button></div>
+              <div id="overview-timeline" class="empty-state">Nog geen gebeurtenissen toegevoegd.</div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><h3>Bewijs dat aandacht vraagt</h3><button class="text-button" data-go="evidence" type="button">Bewijs beheren →</button></div>
+              <div id="overview-evidence" class="empty-state">Nog geen bewijsstukken geregistreerd.</div>
+            </article>
+          </div>
+          <div class="notice"><strong>Belangrijk:</strong> een pinbetaling, foto of verklaring heeft ieder zijn eigen bewijskracht. Noteer steeds wat een bewijsstuk precies ondersteunt en laat conclusies aan de beoordelende instantie.</div>
+        </section>
+
+        <section class="view" id="view-profile">
+          <div class="section-heading"><div><p class="eyebrow">JOUW VERHAAL</p><h2>Persoonlijke verklaring</h2></div></div>
+          <p class="section-intro">Leg in je eigen woorden uit waar je verbleef, waarom inschrijving ontbrak en welke stappen je hebt gezet om dit op te lossen. Houd feiten, herinneringen en vermoedens uit elkaar.</p>
+          <form id="profile-form" class="form-card">
+            <div class="form-grid">
+              <label>Naam (voor eigen gebruik)<input name="name" autocomplete="name" placeholder="Volledige naam"></label>
+              <label>Onderwerp / doel<input name="purpose" placeholder="Bijvoorbeeld: onderbouwing feitelijk verblijf"></label>
+              <label>Beginperiode<input name="periodStart" type="date"></label>
+              <label>Eindperiode<input name="periodEnd" type="date"></label>
+            </div>
+            <label>Persoonlijke verklaring<textarea name="statement" rows="12" placeholder="Beschrijf je woonsituatie chronologisch. Noteer wat je zelf hebt meegemaakt en wat je met documenten of getuigen kunt onderbouwen."></textarea></label>
+            <div class="form-actions"><span class="helper">Wordt alleen lokaal in deze browser opgeslagen.</span><button class="button button-primary" type="submit">Verklaring opslaan</button></div>
+          </form>
+        </section>
+
+        <section class="view" id="view-timeline">
+          <div class="section-heading"><div><p class="eyebrow">CHRONOLOGIE</p><h2>Tijdlijn</h2></div><span class="count-chip" id="timeline-count">0 items</span></div>
+          <p class="section-intro">Registreer woonperiodes, gesprekken, aanvragen, verhuizingen en andere relevante gebeurtenissen. De nieuwste invoer wordt chronologisch gesorteerd.</p>
+          <form id="timeline-form" class="form-card">
+            <h3>Gebeurtenis toevoegen</h3>
+            <div class="form-grid">
+              <label>Datum<input name="date" type="date" required></label>
+              <label>Type<select name="kind"><option>Woonperiode</option><option>Inschrijving / briefadres</option><option>Gesprek / afspraak</option><option>Contact hulpverlening</option><option>Verhuizing</option><option>Overig</option></select></label>
+              <label class="span-2">Titel<input name="title" required placeholder="Korte omschrijving"></label>
+              <label class="span-2">Locatie of betrokken instantie<input name="place" placeholder="Optioneel"></label>
+              <label class="span-2">Toelichting<textarea name="detail" rows="3" placeholder="Wat gebeurde er? Wat weet je zeker?"></textarea></label>
+            </div>
+            <div class="form-actions"><span class="helper">Voeg later eventueel een verwijzing naar een bewijsstuk toe.</span><button class="button button-primary" type="submit">Gebeurtenis toevoegen</button></div>
+          </form>
+          <div id="timeline-list" class="record-list"></div>
+        </section>
+
+        <section class="view" id="view-evidence">
+          <div class="section-heading"><div><p class="eyebrow">ONDERBOUWING</p><h2>Bewijsstukken</h2></div><span class="count-chip" id="evidence-count">0 items</span></div>
+          <p class="section-intro">Registreer ieder document afzonderlijk. Je kunt originele bestanden aan een bewijsstuk koppelen; deze blijven in de lokale browseropslag.</p>
+          <form id="evidence-form" class="form-card">
+            <h3>Bewijsstuk registreren</h3>
+            <div class="form-grid">
+              <label>Datum of periode<input name="date" type="text" placeholder="Bijvoorbeeld: 2024-06 of maart–juni 2025"></label>
+              <label>Categorie<select name="category"><option>Bank / pintransactie</option><option>Betaling woonlasten</option><option>Bericht / correspondentie</option><option>Post / pakket</option><option>Foto</option><option>Getuigenverklaring</option><option>Gemeente / hulpverlening</option><option>Overig</option></select></label>
+              <label class="span-2">Titel<input name="title" required placeholder="Bijvoorbeeld: bankafschrift juni"></label>
+              <label>Status<select name="status"><option value="Aanwezig">Aanwezig</option><option value="Opvragen">Opvragen</option><option value="Nog verzamelen">Nog verzamelen</option><option value="Ontvangen">Ontvangen</option></select></label>
+              <label>Betreft welke periode?<input name="period" placeholder="Woonperiode / datumrange"></label>
+              <label class="span-2">Wat ondersteunt dit bewijsstuk?<textarea name="detail" rows="3" placeholder="Beschrijf feitelijk wat zichtbaar is en welke periode of gebeurtenis dit ondersteunt."></textarea></label>
+              <label class="span-2">Bestanden toevoegen<input name="files" type="file" multiple><span class="helper">Bestanden worden lokaal opgeslagen; ze worden niet naar GitHub verzonden.</span></label>
+            </div>
+            <div class="form-actions"><span class="helper">Bewaar originele documenten ook op een veilige plek.</span><button class="button button-primary" type="submit">Bewijsstuk toevoegen</button></div>
+          </form>
+          <div id="evidence-list" class="record-list"></div>
+        </section>
+
+        <section class="view" id="view-witnesses">
+          <div class="section-heading"><div><p class="eyebrow">MENSEN DIE UIT EIGEN WAARNEMING KUNNEN VERKLAREN</p><h2>Getuigenverklaringen</h2></div><span class="count-chip" id="witness-count">0 personen</span></div>
+          <p class="section-intro">Noteer wie mogelijk een verklaring kan afleggen. Maak duidelijk wat iemand zelf heeft gezien of meegemaakt, en wat iemand alleen van jou heeft gehoord.</p>
+          <form id="witness-form" class="form-card">
+            <h3>Persoon toevoegen</h3>
+            <div class="form-grid">
+              <label>Naam<input name="name" required placeholder="Naam getuige"></label>
+              <label>Relatie tot jou<input name="relationship" placeholder="Bijvoorbeeld: vriend, familielid"></label>
+              <label>Periode die deze persoon kan bevestigen<input name="period" placeholder="Periode / data"></label>
+              <label>Contactgegevens (optioneel)<input name="contact" placeholder="Telefoon of e-mail"></label>
+              <label class="span-2">Wat weet deze persoon uit eigen waarneming?<textarea name="basis" rows="3" placeholder="Bijvoorbeeld: bezoeken, overnachtingen, gesprekken die de persoon zelf heeft meegemaakt."></textarea></label>
+              <label class="span-2">Status<select name="status"><option>Moet nog gevraagd worden</option><option>Gevraagd</option><option>Toegezegd</option><option>Ontvangen</option></select></label>
+            </div>
+            <div class="form-actions"><span class="helper">De getuige bepaalt zelf de inhoud en ondertekent de eigen verklaring.</span><button class="button button-primary" type="submit">Persoon toevoegen</button></div>
+          </form>
+          <div id="witness-list" class="record-list"></div>
+        </section>
+
+        <section class="view" id="view-contacts">
+          <div class="section-heading"><div><p class="eyebrow">CONTACTGESCHIEDENIS</p><h2>Contactlog</h2></div><span class="count-chip" id="contact-count">0 momenten</span></div>
+          <p class="section-intro">Houd bij wanneer je contact had met de gemeente, buurtteammedewerkers, hulpverlening of andere betrokken instanties.</p>
+          <form id="contact-form" class="form-card">
+            <h3>Contactmoment toevoegen</h3>
+            <div class="form-grid">
+              <label>Datum<input name="date" type="date" required></label>
+              <label>Organisatie<input name="organization" required placeholder="Naam organisatie"></label>
+              <label>Contactpersoon<input name="person" placeholder="Naam, indien bekend"></label>
+              <label>Onderwerp<input name="subject" placeholder="Onderwerp van contact"></label>
+              <label class="span-2">Uitkomst / besproken punten<textarea name="outcome" rows="3" placeholder="Wat is besproken of afgesproken?"></textarea></label>
+              <label>Vervolgdatum (optioneel)<input name="followup" type="date"></label>
+              <label>Status<select name="status"><option>Afgerond</option><option>Wacht op reactie</option><option>Vervolg nodig</option></select></label>
+            </div>
+            <div class="form-actions"><span class="helper">Bewaar e-mails of brieven afzonderlijk als bewijs.</span><button class="button button-primary" type="submit">Contactmoment toevoegen</button></div>
+          </form>
+          <div id="contact-list" class="record-list"></div>
+        </section>
+      </div>
+    </div>
+
+    <section id="print-report" class="print-report" aria-hidden="true"></section>
+    <footer class="footer"><span>Dossier Amsterdam · lokale dossierwerkplek</span><span>Geen gegevens worden naar een server verstuurd.</span></footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
