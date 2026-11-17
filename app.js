@@ -171,9 +171,39 @@
       card.append(links);
     }
     const actions = textNode("div", "record-actions");
+    actions.append(actionButton("Bewerken", "", () => editRecord(collection, id)));
     actions.append(actionButton("Verwijderen", "danger", () => deleteRecord(collection, id)));
     card.append(actions);
     return card;
+  }
+
+  function clearEditingForm(form) {
+    form.reset();
+    delete form.dataset.editingId;
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) submit.textContent = form.dataset.defaultSubmitLabel || "Toevoegen";
+  }
+
+  function editRecord(collection, id) {
+    const item = state[collection].find(record => record.id === id);
+    if (!item) return;
+    const map = {
+      timeline: { form: "timeline-form", fields: ["date", "kind", "title", "place", "detail"] },
+      evidence: { form: "evidence-form", fields: ["date", "category", "title", "status", "period", "detail"] },
+      witnesses: { form: "witness-form", fields: ["name", "relationship", "period", "contact", "basis", "status"] },
+      contacts: { form: "contact-form", fields: ["date", "organization", "person", "subject", "outcome", "followup", "status"] }
+    };
+    const config = map[collection];
+    if (!config) return;
+    const form = $("#" + config.form);
+    config.fields.forEach(key => {
+      if (form.elements[key]) form.elements[key].value = item[key] || "";
+    });
+    form.dataset.editingId = id;
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) submit.textContent = "Wijzigingen opslaan";
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    showToast("Je bewerkt nu dit onderdeel. Sla de wijzigingen op in het formulier.");
   }
 
   function renderTimeline() {
@@ -461,7 +491,12 @@
   }
 
   function registerEvents() {
-    $$(".nav-button").forEach(button => button.addEventListener("click", () => activateView(button.dataset.view)));
+    ["timeline-form", "evidence-form", "witness-form", "contact-form"].forEach(id => {
+      const form = $("#" + id);
+      const submit = form.querySelector('button[type="submit"]');
+      if (submit) form.dataset.defaultSubmitLabel = submit.textContent;
+    });
+    $(".nav-button").forEach(button => button.addEventListener("click", () => activateView(button.dataset.view)));
     $$("[data-go]").forEach(button => button.addEventListener("click", () => activateView(button.dataset.go)));
 
     $("#profile-form").addEventListener("submit", async event => {
@@ -478,64 +513,87 @@
 
     $("#timeline-form").addEventListener("submit", async event => {
       event.preventDefault();
-      const values = formObject(event.currentTarget);
-      state.timeline.push({ id: makeId(), date: values.date, kind: values.kind, title: values.title.trim(), place: values.place.trim(), detail: values.detail.trim() });
-      event.currentTarget.reset();
+      const form = event.currentTarget;
+      const values = formObject(form);
+      const id = form.dataset.editingId || makeId();
+      const record = { id, date: values.date, kind: values.kind, title: values.title.trim(), place: values.place.trim(), detail: values.detail.trim() };
+      const index = state.timeline.findIndex(item => item.id === id);
+      if (index >= 0) state.timeline[index] = record;
+      else state.timeline.push(record);
+      clearEditingForm(form);
       await saveState();
       renderAll();
-      showToast("Gebeurtenis toegevoegd.");
+      showToast(index >= 0 ? "Wijzigingen opgeslagen." : "Gebeurtenis toegevoegd.");
     });
 
     $("#evidence-form").addEventListener("submit", async event => {
       event.preventDefault();
       const form = event.currentTarget;
       const values = formObject(form);
+      const editingId = form.dataset.editingId;
+      const existing = editingId ? state.evidence.find(item => item.id === editingId) : null;
+      const attachments = existing ? [...(existing.attachments || [])] : [];
+      const newlyAdded = [];
       const files = [...form.elements.files.files];
-      const attachments = [];
       try {
         for (const file of files) {
           const id = makeId();
           await putAttachment({ id, name: file.name, type: file.type || "application/octet-stream", lastModified: file.lastModified || null, blob: file.slice(0, file.size, file.type || "application/octet-stream") });
-          attachments.push({ id, name: file.name, type: file.type, size: file.size });
+          const attachment = { id, name: file.name, type: file.type, size: file.size };
+          attachments.push(attachment);
+          newlyAdded.push(attachment);
         }
-        state.evidence.push({
-          id: makeId(), date: values.date.trim(), category: values.category, title: values.title.trim(),
+        const record = {
+          id: editingId || makeId(), date: values.date.trim(), category: values.category, title: values.title.trim(),
           status: values.status, period: values.period.trim(), detail: values.detail.trim(), attachments
-        });
-        form.reset();
+        };
+        const index = state.evidence.findIndex(item => item.id === record.id);
+        if (index >= 0) state.evidence[index] = record;
+        else state.evidence.push(record);
+        clearEditingForm(form);
         await saveState();
         renderAll();
-        showToast("Bewijsstuk lokaal opgeslagen.");
+        showToast(index >= 0 ? "Wijzigingen opgeslagen." : "Bewijsstuk lokaal opgeslagen.");
       } catch (error) {
-        for (const file of attachments) await removeAttachment(file.id);
-        throw error;
+        for (const file of newlyAdded) await removeAttachment(file.id);
+        showToast(error.message || "Bewijsstuk kon niet worden opgeslagen.");
       }
     });
 
     $("#witness-form").addEventListener("submit", async event => {
       event.preventDefault();
-      const values = formObject(event.currentTarget);
-      state.witnesses.push({
-        id: makeId(), name: values.name.trim(), relationship: values.relationship.trim(), period: values.period.trim(),
+      const form = event.currentTarget;
+      const values = formObject(form);
+      const id = form.dataset.editingId || makeId();
+      const record = {
+        id, name: values.name.trim(), relationship: values.relationship.trim(), period: values.period.trim(),
         contact: values.contact.trim(), basis: values.basis.trim(), status: values.status
-      });
-      event.currentTarget.reset();
+      };
+      const index = state.witnesses.findIndex(item => item.id === id);
+      if (index >= 0) state.witnesses[index] = record;
+      else state.witnesses.push(record);
+      clearEditingForm(form);
       await saveState();
       renderAll();
-      showToast("Persoon toegevoegd.");
+      showToast(index >= 0 ? "Wijzigingen opgeslagen." : "Persoon toegevoegd.");
     });
 
     $("#contact-form").addEventListener("submit", async event => {
       event.preventDefault();
-      const values = formObject(event.currentTarget);
-      state.contacts.push({
-        id: makeId(), date: values.date, organization: values.organization.trim(), person: values.person.trim(),
+      const form = event.currentTarget;
+      const values = formObject(form);
+      const id = form.dataset.editingId || makeId();
+      const record = {
+        id, date: values.date, organization: values.organization.trim(), person: values.person.trim(),
         subject: values.subject.trim(), outcome: values.outcome.trim(), followup: values.followup, status: values.status
-      });
-      event.currentTarget.reset();
+      };
+      const index = state.contacts.findIndex(item => item.id === id);
+      if (index >= 0) state.contacts[index] = record;
+      else state.contacts.push(record);
+      clearEditingForm(form);
       await saveState();
       renderAll();
-      showToast("Contactmoment toegevoegd.");
+      showToast(index >= 0 ? "Wijzigingen opgeslagen." : "Contactmoment toegevoegd.");
     });
 
     $("#print-button").addEventListener("click", () => {
