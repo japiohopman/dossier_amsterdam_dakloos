@@ -1,0 +1,26 @@
+# Personal information and evidence must never be committed here.
+private-data/
+evidence/
+exports/
+backups/
+*.dossier-backup.json
+dossier-amsterdam-backup-*.json
+
+# Common private evidence formats (defence in depth, not a security boundary).
+*.pdf
+*.csv
+*.eml
+*.msg
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+*.mp4
+*.mov
+*.wav
+*.mp3
