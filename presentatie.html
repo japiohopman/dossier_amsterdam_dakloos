@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172b36">
+  <meta name="description" content="Offline presentatiestand voor het persoonlijke bewijsdossier.">
+  <title>Dossier Amsterdam — presentatie</title>
+  <link rel="stylesheet" href="presentatie.css">
+  <script src="presentatie.js" defer></script>
+</head>
+<body>
+  <header class="presenter-bar">
+    <a class="back-link" href="index.html">← Terug naar dossier</a>
+    <div class="bar-center"><span class="live-dot"></span> LOKALE PRESENTATIE <span class="bar-separator">/</span> NIET GEDEELD</div>
+    <button class="icon-button" id="fullscreen-button" type="button" aria-label="Volledig scherm">⛶</button>
+  </header>
+
+  <main class="stage" id="stage" aria-live="polite">
+    <div class="loading-state">Dossiergegevens worden lokaal geladen…</div>
+  </main>
+
+  <footer class="presenter-controls">
+    <button class="control-button" id="previous-button" type="button" aria-label="Vorige dia">← <span>Vorige</span></button>
+    <div class="progress-area">
+      <div class="progress-meta"><span id="slide-title">Overzicht</span><span id="slide-count">1 / 1</span></div>
+      <div class="progress-track"><div id="progress-fill"></div></div>
+      <div class="dot-nav" id="dot-nav" aria-label="Dia kiezen"></div>
+    </div>
+    <button class="control-button control-next" id="next-button" type="button"><span>Volgende</span> →</button>
+  </footer>
+
+  <div id="presentation-toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
