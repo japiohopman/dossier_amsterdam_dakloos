@@ -1,43 +1,52 @@
-# Dossier Amsterdam — lokale dossierwerkplek
+# Dossier Amsterdam — lokale presentatie en dossierwerkplek
 
-Een statische Nederlandstalige webapp om een persoonlijk bewijsdossier chronologisch te ordenen.
+Deze repository bevat uitsluitend de lege applicatiecode voor een persoonlijk dossier. De bedoeling is dat de werkplek en presentatiestand **lokaal op je eigen Windows-laptop** draaien, niet als openbare dossierwebsite.
 
-## Privacyontwerp
+## Privacy: lees dit eerst
 
-Deze repository is **publiek**. De repository bevat uitsluitend de applicatiecode en algemene uitleg. Voeg hier nooit persoonlijke dossierinformatie, namen, adressen, bankafschriften, chatberichten, foto's, getuigenverklaringen of andere bewijsbestanden aan toe.
+Deze repository is publiek. Zet hier nooit persoonlijke gegevens of bewijsbestanden in:
+- geen namen, adressen, telefoonnummers of e-mailadressen van betrokkenen;
+- geen bankafschriften, pintransacties of betaalbewijzen;
+- geen WhatsApp-exports, e-mails, foto's, poststukken of getuigenverklaringen;
+- geen PDF's of exports uit de dossierapp.
 
-De applicatie bewaart ingevulde gegevens en geselecteerde bewijsbestanden uitsluitend in de lokale browseropslag (IndexedDB) van het apparaat waarop je de website gebruikt. De applicatie bevat geen backend, analytics, externe fonts, externe scripts of uploadfunctie. De app verstuurt dossiergegevens niet naar GitHub of een andere server.
+De dossiergegevens en gekozen bewijsbestanden worden alleen in IndexedDB van de browser op de eigen laptop opgeslagen. De app bevat geen backend, analytics, externe scripts of uploadfunctie. De lokale startserver luistert uitsluitend op `127.0.0.1` (deze laptop) en verstuurt niets naar GitHub.
 
-Belangrijke gevolgen:
-- De publieke website bevat geen persoonlijke dossierinhoud.
-- Een link naar de website deelt geen ingevulde gegevens.
-- Gegevens zijn alleen beschikbaar in dezelfde browser op hetzelfde apparaat.
-- Browsergegevens kunnen verloren gaan bij het wissen van browsergegevens of bij een defect apparaat.
-- Maak daarom regelmatig een **versleutelde back-up** via de knop in de applicatie en bewaar die veilig.
-- De browseropslag zelf is niet versleuteld. Beveilig je computeraccount en browserprofiel.
-- Exporteer of print alleen de onderdelen die je bewust met de gemeente wilt delen.
+**Activeer GitHub Pages niet voor het persoonlijke dossier.** Een Pages-website is publiek toegankelijk. De code kan publiek blijven, maar je ingevulde dossier en bijlagen horen uitsluitend lokaal te blijven.
 
-## Gebruik
+## Starten op Windows
 
-1. Open de website op je eigen apparaat via GitHub Pages, of open `index.html` lokaal.
-2. Vul je gegevens en bewijsregister in.
-3. Selecteer bewijsbestanden bij een bewijsstuk. De bestanden worden in IndexedDB van deze browser bewaard.
-4. Maak regelmatig een versleutelde back-up.
-5. Gebruik **Print / opslaan als PDF** om een dossieroverzicht te maken. Voeg de originele bewijsbestanden desgewenst apart toe aan je indiening.
+1. Open deze repository op GitHub.
+2. Kies **Code → Download ZIP** en sla het ZIP-bestand op je laptop op.
+3. Pak het ZIP-bestand uit in een eigen map, bijvoorbeeld Documenten.
+4. Dubbelklik op `Start-lokaal.bat`.
+5. Er opent een browservenster op `http://127.0.0.1:8765/index.html`.
+6. Vul je dossier in. Klik bovenaan op **Presentatie openen** om de schermvullende dia's te tonen.
 
-## GitHub Pages activeren
+Laat het zwarte PowerShell-venster open zolang je de dossierwerkplek gebruikt. Sluit de lokale server af met Ctrl+C in dat venster. De startscript gebruikt alleen Windows PowerShell en de ingebouwde .NET-bibliotheken; Python of Node.js is niet nodig.
 
-Na het publiceren van de bestanden:
-1. Open **Settings → Pages** in deze repository.
-2. Kies bij de publicatiebron **Deploy from a branch**.
-3. Selecteer branch `main` en map `/ (root)`.
-4. Sla op en open de door GitHub getoonde website-link.
+Gebruik steeds hetzelfde browserprofiel en dezelfde URL (`127.0.0.1:8765)). Browseropslag op `localhost`, `127.0.0.1` en een GitHub Pages-domein is van elkaar gescheiden.
 
-Let op: GitHub Pages is publiek toegankelijk. Dat is hier alleen bedoeld om de lege applicatiecode te leveren. Vul nooit persoonlijke dossierinformatie in bronbestanden in en commit nooit exports of bewijsstukken.
+## In de dossierwerkplek
 
-## Techniek
+- Persoonlijke verklaring en adres volgens de bewijsstukken.
+- Tijdlijn met woonperiodes, verhuizingen, aanvragen en gesprekken.
+- Bewijsregister met lokale PDF's, foto's en andere bestanden.
+- Getuigen / personen die uit eigen waarneming kunnen verklaren.
+- Contactlog voor de gemeente en hulpverlening.
+- Presentatiestand met dia's en knoppen om gekoppelde lokale bewijsbestanden te openen.
+- Afdrukken naar PDF en versleutelde back-up maken/terugzetten.
 
-- HTML, CSS en vanilla JavaScript.
-- IndexedDB voor lokale gegevens en bewijsbestanden.
-- Web Crypto API (PBKDF2 + AES-GCM) voor versleutelde JSON-back-ups.
-- Geen framework of externe afhankelijkheden.
+## Back-ups en opslag
+
+- Maak regelmatig een **versleutelde back-up** via de knop in de werkplek.
+- Bewaar het wachtwoord apart. Zonder dit wachtwoord is de back-up niet terug te zetten.
+- De gewone browseropslag is niet versleuteld. Beveilig je Windows-account en laptop.
+- Bij het wissen van browsergegevens kunnen dossiergegevens verdwijnen.
+- De versleutelde back-up bevat ook de bestanden die je in de app hebt gekoppeld. Bewaar die back-up veilig.
+
+## Presenteren
+
+Open vanuit de werkplek **Presentatie openen**. Navigeer met de pijltjestoetsen links/rechts, Page Up/Page Down of de knoppen onderaan. Gebruik F of het schermknopje voor volledig scherm. De presentatiestand leest dezelfde lokale gegevens en bijlagen uit de browseropslag.
+
+Controleer vóór het gesprek altijd alle datums, adressen en omschrijvingen. Een banktransactie kan een plaatselijk patroon ondersteunen, maar bewijst op zichzelf niet dat iemand onafgebroken op één woonadres verbleef. Toon daarom het geheel: afschriften, woonperiodes, correspondentie, hulpverleningscontacten en verklaringen uit eigen waarneming.
