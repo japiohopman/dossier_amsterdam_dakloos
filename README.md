@@ -50,3 +50,12 @@ Gebruik steeds hetzelfde browserprofiel en dezelfde URL (`127.0.0.1:8765)). Brow
 Open vanuit de werkplek **Presentatie openen**. Navigeer met de pijltjestoetsen links/rechts, Page Up/Page Down of de knoppen onderaan. Gebruik F of het schermknopje voor volledig scherm. De presentatiestand leest dezelfde lokale gegevens en bijlagen uit de browseropslag.
 
 Controleer vóór het gesprek altijd alle datums, adressen en omschrijvingen. Een banktransactie kan een plaatselijk patroon ondersteunen, maar bewijst op zichzelf niet dat iemand onafgebroken op één woonadres verbleef. Toon daarom het geheel: afschriften, woonperiodes, correspondentie, hulpverleningscontacten en verklaringen uit eigen waarneming.
+
+
+## Bankafschriften en getuigen-PDF's ordenen
+
+- Registreer ieder bankafschrift of maandoverzicht als een **apart bewijsstuk**. Gebruik een herkenbare titel, bijvoorbeeld "ABN-AMRO — mei 2024", en vul de afschriftperiode in.
+- Voeg bij dat record de bijbehorende PDF toe. De presentatiestand verdeelt bankafschriften over maximaal vier vermeldingen per dia.
+- Registreer iedere getuige afzonderlijk bij **Getuigenverklaringen** en voeg de ondertekende verklaring-PDF direct aan die persoon toe.
+- In de presentatie kan Melissa vervolgens de gekoppelde PDF rechtstreeks vanaf de laptop openen.
+- De presentatie laat alleen de registraties zien die je hebt toegevoegd. Controleer dat ieder bestand echt is gekoppeld en opent voordat je het gesprek ingaat.
