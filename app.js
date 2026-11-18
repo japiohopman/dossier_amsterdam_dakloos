@@ -11,7 +11,7 @@
 
   const emptyState = () => ({
     id: STATE_KEY,
-    profile: { name: "", purpose: "", periodStart: "", periodEnd: "", statement: "" },
+    profile: { name: "", purpose: "", mainAddress: "", periodStart: "", periodEnd: "", statement: "" },
     timeline: [],
     evidence: [],
     witnesses: [],
@@ -309,7 +309,7 @@
   function renderProfile() {
     const form = $("#profile-form");
     const p = state.profile || {};
-    ["name", "purpose", "periodStart", "periodEnd", "statement"].forEach(key => {
+    ["name", "purpose", "mainAddress", "periodStart", "periodEnd", "statement"].forEach(key => {
       if (form.elements[key]) form.elements[key].value = p[key] || "";
     });
   }
@@ -321,6 +321,7 @@
     const p = state.profile || {};
     root.append(textNode("p", "print-meta", [
       p.name ? "Naam: " + p.name : "",
+      p.mainAddress ? "Woonadres in dossier: " + p.mainAddress : "",
       p.purpose ? "Onderwerp: " + p.purpose : "",
       p.periodStart || p.periodEnd ? "Periode: " + (p.periodStart || "—") + " t/m " + (p.periodEnd || "—") : ""
     ].filter(Boolean).join(" · ") || "Persoonlijk dossieroverzicht"));
@@ -503,7 +504,7 @@
       event.preventDefault();
       const values = formObject(event.currentTarget);
       state.profile = {
-        name: values.name.trim(), purpose: values.purpose.trim(), periodStart: values.periodStart,
+        name: values.name.trim(), purpose: values.purpose.trim(), mainAddress: values.mainAddress.trim(), periodStart: values.periodStart,
         periodEnd: values.periodEnd, statement: values.statement.trim()
       };
       await saveState();
