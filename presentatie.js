@@ -137,6 +137,16 @@
     main.append(el("div", "row-title", item.name || "Contactpersoon"));
     main.append(el("div", "row-sub", [item.relationship, item.contact].filter(Boolean).join(" · ")));
     if (item.basis) main.append(el("p", "row-detail", item.basis));
+    if (item.attachments?.length) {
+      const fileWrap = el("div", "file-links");
+      item.attachments.forEach(file => {
+        const button = el("button", "open-file", "Open verklaring: " + file.name);
+        button.type = "button";
+        button.addEventListener("click", openLocalAttachment(file.id));
+        fileWrap.append(button);
+      });
+      main.append(fileWrap);
+    }
     row.append(main);
     row.append(el("span", "status" + (["Moet nog gevraagd worden", "Gevraagd"].includes(item.status) ? " pending" : ""), item.status || "Status onbekend"));
     parent.append(row);
@@ -232,19 +242,29 @@
       result.push({ title: page ? "Tijdlijn vervolg" : "Gebeurtenissen", node });
     }
 
-    // Bank statement and transaction records.
+    // Bank statements: split into compact, chronological slides.
     {
-      const bankItems = evidence.filter(item => /bank|pin|transactie|rekeningafschrift/i.test([item.category, item.title].join(" ")));
-      const node = slide("Bankafschriften en pintransacties", "DOCUMENTAIR BEWIJS", result.length + 1);
-      if (!bankItems.length) addEmpty(node, "Nog geen bankafschriften in het lokale bewijsregister gezet. Voeg de relevante PDF's toe bij Bewijsstukken met categorie Bank / pintransactie.");
-      else {
-        const list = el("div", "evidence-list");
-        bankItems.forEach(item => addEvidenceRow(list, item));
-        node.append(list);
+      const bankItems = evidence
+        .filter(item => /bank|pin|transactie|rekeningafschrift/i.test([item.category, item.title].join(" ")))
+        .sort((a, b) => (a.date || a.period || "").localeCompare(b.date || b.period || ""));
+      if (!bankItems.length) {
+        const node = slide("Bankafschriften en pintransacties", "DOCUMENTAIR BEWIJS", result.length + 1);
+        addEmpty(node, "Nog geen bankafschriften in het lokale bewijsregister gezet. Voeg ieder afschrift als afzonderlijk bewijsstuk toe, met de maand/periode en de bijbehorende PDF.");
+        result.push({ title: "Bankafschriften", node });
+      } else {
+        const pages = Math.ceil(bankItems.length / 4);
+        for (let page = 0; page < pages; page++) {
+          const chunk = bankItems.slice(page * 4, page * 4 + 4);
+          const node = slide(page === 0 ? "Bankafschriften en pintransacties" : "Bankafschriften — vervolg", "DOCUMENTAIR BEWIJS · " + (page + 1) + " / " + pages, result.length + 1);
+          const list = el("div", "evidence-list");
+          chunk.forEach(item => addEvidenceRow(list, item));
+          node.append(list);
+          if (page === pages - 1) {
+            node.append(el("div", "callout", "De afschriften tonen het daarop vermelde correspondentieadres en kunnen samen met transacties een patroon van activiteiten in Amsterdam ondersteunen. Transacties bewijzen op zichzelf niet dat iemand onafgebroken op één woonadres verbleef."));
+          }
+          result.push({ title: page === 0 ? "Bankafschriften" : "Bankafschriften vervolg", node });
+        }
       }
-      const caution = el("div", "callout", "Bankafschriften kunnen het vermelde correspondentieadres en een patroon van transacties in Amsterdam ondersteunen. Transacties zijn sterke aanvullende aanwijzingen, maar bewijzen op zichzelf niet dat iemand iedere dag fysiek op één adres verbleef. Bespreek het patroon samen met de overige documenten en verklaringen.");
-      node.append(caution);
-      result.push({ title: "Bankafschriften", node });
     }
 
     // Help, municipality and registration efforts.
@@ -262,37 +282,58 @@
       result.push({ title: "Pogingen tot inschrijving", node });
     }
 
-    // Witnesses.
+    // Witnesses with one individually linked PDF statement per person.
     {
-      const node = slide("Mensen die kunnen verklaren", "GETUIGEN EN ONDERSTEUNING", result.length + 1);
-      if (!witnesses.length) addEmpty(node, "Nog geen getuigen toegevoegd. Noteer per persoon welke periode diegene uit eigen waarneming kan bevestigen. Een getuige hoeft geen aannames te doen over dagen waarop diegene je niet heeft gezien.");
-      else {
-        const list = el("div", "people-list");
-        witnesses.forEach(item => addPersonRow(list, item));
-        node.append(list);
+      if (!witnesses.length) {
+        const node = slide("Mensen die kunnen verklaren", "GETUIGEN EN ONDERSTEUNING", result.length + 1);
+        addEmpty(node, "Nog geen getuigen toegevoegd. Noteer per persoon welke periode diegene uit eigen waarneming kan bevestigen. Een getuige hoeft geen aannames te doen over dagen waarop diegene je niet heeft gezien.");
+        node.append(el("p", "slide-note", "Laat iedere getuige de eigen verklaring controleren, dateren en ondertekenen."));
+        result.push({ title: "Getuigen", node });
+      } else {
+        const pages = Math.ceil(witnesses.length / 3);
+        for (let page = 0; page < pages; page++) {
+          const chunk = witnesses.slice(page * 3, page * 3 + 3);
+          const node = slide(page === 0 ? "Mensen die kunnen verklaren" : "Getuigen — vervolg", "GETUIGEN EN ONDERSTEUNING · " + (page + 1) + " / " + pages, result.length + 1);
+          const list = el("div", "people-list");
+          chunk.forEach(item => addPersonRow(list, item));
+          node.append(list);
+          node.append(el("p", "slide-note", "Open de bijgevoegde PDF om de oorspronkelijke ondertekende verklaring te bekijken."));
+          result.push({ title: page === 0 ? "Getuigen" : "Getuigen vervolg", node });
+        }
       }
-      node.append(el("p", "slide-note", "Laat iedere getuige de eigen verklaring controleren, dateren en ondertekenen."));
-      result.push({ title: "Getuigen", node });
     }
 
-    // Remaining non-bank proof and open items.
+    // Other proof: paginated to avoid overcrowded slides.
     {
-      const other = evidence.filter(item => !/bank|pin|transactie|rekeningafschrift/i.test([item.category, item.title].join(" ")));
-      const open = evidence.filter(item => ["Opvragen", "Nog verzamelen"].includes(item.status));
-      const node = slide("Overige bewijsstukken en vervolgstappen", "COMPLEETHEID VAN HET DOSSIER", result.length + 1);
-      if (other.length) {
-        const list = el("div", "evidence-list");
-        other.forEach(item => addEvidenceRow(list, item));
-        node.append(list);
-      } else addEmpty(node, "Registreer hier WhatsApp-berichten, post, foto's, betalingen aan hoofdbewoners, verklaringen en stukken van het Buurtteam.");
-      if (open.length) {
-        node.append(el("h3", "", "Nog op te vragen of te verzamelen"));
-        const list = el("div", "evidence-list");
-        open.forEach(item => addEvidenceRow(list, item));
-        node.append(list);
+      const other = evidence
+        .filter(item => !/bank|pin|transactie|rekeningafschrift/i.test([item.category, item.title].join(" ")))
+        .sort((a, b) => (a.date || a.period || "").localeCompare(b.date || b.period || ""));
+      if (!other.length) {
+        const node = slide("Overige bewijsstukken", "COMPLEETHEID VAN HET DOSSIER", result.length + 1);
+        addEmpty(node, "Registreer hier WhatsApp-berichten, post, foto's, betalingen aan hoofdbewoners en stukken van het Buurtteam.");
+        result.push({ title: "Overig bewijs", node });
+      } else {
+        const pages = Math.ceil(other.length / 4);
+        for (let page = 0; page < pages; page++) {
+          const chunk = other.slice(page * 4, page * 4 + 4);
+          const node = slide(page === 0 ? "Overige bewijsstukken" : "Overige bewijsstukken — vervolg", "ANDERE DOCUMENTEN · " + (page + 1) + " / " + pages, result.length + 1);
+          const list = el("div", "evidence-list");
+          chunk.forEach(item => addEvidenceRow(list, item));
+          node.append(list);
+          node.append(el("p", "slide-note", "Controleer vóór het gesprek of de originele bestanden op de laptop beschikbaar zijn."));
+          result.push({ title: page === 0 ? "Overig bewijs" : "Overig bewijs vervolg", node });
+        }
       }
-      node.append(el("p", "slide-note", "Controleer vóór het gesprek of de originele PDF's, berichten en verklaringen op de laptop beschikbaar zijn."));
-      result.push({ title: "Overig bewijs", node });
+
+      const open = evidence.filter(item => ["Opvragen", "Nog verzamelen"].includes(item.status));
+      if (open.length) {
+        const node = slide("Nog op te vragen of te verzamelen", "OPENSTAANDE ACTIES", result.length + 1);
+        const list = el("div", "evidence-list");
+        open.slice(0, 8).forEach(item => addEvidenceRow(list, item));
+        node.append(list);
+        if (open.length > 8) node.append(el("p", "slide-note", "Er zijn nog " + (open.length - 8) + " openstaande onderdelen niet op deze dia getoond. Bekijk de volledige lijst in het dossier."));
+        result.push({ title: "Openstaande acties", node });
+      }
     }
 
     // Closing slide.
