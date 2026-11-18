@@ -129,7 +129,7 @@
     const record = state[collection].find(item => item.id === id);
     if (!record) return;
     if (!window.confirm("Dit onderdeel definitief verwijderen?")) return;
-    if (collection === "evidence" && Array.isArray(record.attachments)) {
+    if (["evidence", "witnesses"].includes(collection) && Array.isArray(record.attachments)) {
       for (const file of record.attachments) await removeAttachment(file.id);
     }
     state[collection] = state[collection].filter(item => item.id !== id);
@@ -248,7 +248,7 @@
     [...state.witnesses].forEach(item => list.append(createRecordCard({
       date: item.period || "Periode niet ingevuld", title: item.name,
       meta: [item.relationship, item.contact].filter(Boolean).join(" · "),
-      detail: item.basis, status: item.status, collection: "witnesses", id: item.id
+      detail: item.basis, status: item.status, collection: "witnesses", id: item.id, files: item.attachments || []
     })));
   }
 
@@ -334,7 +334,7 @@
     const sections = [
       { title: "Tijdlijn", items: state.timeline, describe: item => [formatDate(item.date), item.kind, item.place].filter(Boolean).join(" · "), detail: item => item.detail },
       { title: "Bewijsstukken", items: state.evidence, describe: item => [item.date, item.category, item.period, "Status: " + item.status].filter(Boolean).join(" · "), detail: item => [item.detail, item.attachments?.length ? "Bestanden: " + item.attachments.map(file => file.name).join(", ") : "Geen bestand gekoppeld."].filter(Boolean).join("\n") },
-      { title: "Getuigenverklaringen", items: state.witnesses, describe: item => [item.relationship, item.period, item.contact, "Status: " + item.status].filter(Boolean).join(" · "), detail: item => item.basis },
+      { title: "Getuigenverklaringen", items: state.witnesses, describe: item => [item.relationship, item.period, item.contact, "Status: " + item.status].filter(Boolean).join(" · "), detail: item => [item.basis, item.attachments?.length ? "Ondertekende verklaring: " + item.attachments.map(file => file.name).join(", ") : "Nog geen PDF-verklaring gekoppeld."].filter(Boolean).join("\n") },
       { title: "Contact met instanties", items: state.contacts, describe: item => [formatDate(item.date), item.person, item.subject, item.followup ? "Vervolg: " + formatDate(item.followup) : "", "Status: " + item.status].filter(Boolean).join(" · "), detail: item => item.outcome }
     ];
     sections.forEach(section => {
@@ -566,11 +566,29 @@
       const form = event.currentTarget;
       const values = formObject(form);
       const id = form.dataset.editingId || makeId();
+      const index = state.witnesses.findIndex(item => item.id === id);
+      const existing = index >= 0 ? state.witnesses[index] : null;
+      const attachments = existing ? [...(existing.attachments || [])] : [];
+      const selectedFile = form.elements.witnessFile.files[0];
+      if (selectedFile) {
+        if (selectedFile.type !== "application/pdf" && !selectedFile.name.toLowerCase().endsWith(".pdf")) {
+          showToast("Voeg voor een getuigenverklaring een PDF-bestand toe.");
+          return;
+        }
+        const fileId = makeId();
+        await putAttachment({
+          id: fileId,
+          name: selectedFile.name,
+          type: "application/pdf",
+          lastModified: selectedFile.lastModified || null,
+          blob: selectedFile.slice(0, selectedFile.size, "application/pdf")
+        });
+        attachments.push({ id: fileId, name: selectedFile.name, type: "application/pdf", size: selectedFile.size });
+      }
       const record = {
         id, name: values.name.trim(), relationship: values.relationship.trim(), period: values.period.trim(),
-        contact: values.contact.trim(), basis: values.basis.trim(), status: values.status
+        contact: values.contact.trim(), basis: values.basis.trim(), status: values.status, attachments
       };
-      const index = state.witnesses.findIndex(item => item.id === id);
       if (index >= 0) state.witnesses[index] = record;
       else state.witnesses.push(record);
       clearEditingForm(form);
