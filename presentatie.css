@@ -79,6 +79,7 @@ h2 { margin: 0; color: var(--ink); font-size: clamp(34px, 4vw, 53px); line-heigh
 .row-detail { color: #596a6e; font-size: 11px; line-height: 1.55; margin: 6px 0 0; white-space: pre-wrap; }
 .status { border-radius: 20px; padding: 5px 8px; background: #e7ece8; color: #5b7466; font-size: 9px; font-weight: 800; white-space: nowrap; }
 .status.pending { background: #f3e8dc; color: #956b4b; }
+.file-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; position: relative; z-index: 2; }
 .open-file { border: 1px solid #bdc9c3; background: #f9faf7; color: #456457; border-radius: 5px; padding: 7px 9px; font-size: 10px; font-weight: 750; white-space: nowrap; }
 .open-file:hover { border-color: #789b88; background: white; }
 .slide-note { color: #7d898a; font-size: 10px; margin-top: auto; padding-top: 18px; position: relative; z-index: 1; }
