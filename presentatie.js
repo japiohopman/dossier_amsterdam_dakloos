@@ -88,15 +88,20 @@
 
   function openLocalAttachment(id) {
     return async () => {
+      const tab = window.open("about:blank", "_blank");
+      if (!tab) return showToast("Je browser blokkeerde het nieuwe tabblad. Sta pop-ups voor deze lokale pagina toe.");
       try {
         const tx = db.transaction("attachments", "readonly");
         const item = await requestValue(tx.objectStore("attachments").get(id));
-        if (!item || !item.blob) return showToast("Dit bestand is niet meer in de lokale browseropslag aanwezig.");
+        if (!item || !item.blob) {
+          tab.close();
+          return showToast("Dit bestand is niet meer in de lokale browseropslag aanwezig.");
+        }
         const url = URL.createObjectURL(item.blob);
         activeObjectUrls.push(url);
-        const tab = window.open(url, "_blank", "noopener");
-        if (!tab) showToast("Je browser blokkeerde het nieuwe tabblad. Sta pop-ups voor deze lokale pagina toe.");
+        tab.location.href = url;
       } catch (error) {
+        tab.close();
         showToast(error.message || "Bestand openen is niet gelukt.");
       }
     };
